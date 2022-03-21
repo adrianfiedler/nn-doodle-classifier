@@ -54,24 +54,55 @@ function setup() {
   training = training.concat(birds.training);
   training = training.concat(apples.training);
 
+  let testing = [];
+  testing = testing.concat(trees.testing);
+  testing = testing.concat(birds.testing);
+  testing = testing.concat(apples.testing);
+  
+  for (let i = 1; i < 6; i++) {
+    trainEpoch(training);
+    console.log("Epoch: " + i);
+    let percent = testAll(testing);
+    console.log('Correct: ' + percent + "%");
+  }
+
+  // printDoodles();
+}
+
+function trainEpoch(training) {
   shuffle(training, true);
   // console.log(training);
 
   // Train for one epoch
   for (let i = 0; i < training.length; i++) {
-    let inputs = [];
     let data = training[i];
-    for (let j = 0; j < data.length; j++) {
-      inputs[j] = data[j] / 255.0;
-    }
+    let inputs = data.map((x) => x / 255);
     let label = training[i].label;
     let targets = [0, 0, 0];
     targets[label] = 1;
     nn.train(inputs, targets);
   }
+}
 
-  console.log('trained for one epoch');
-  // printDoodles();
+function testAll(testing) {
+  let correct = 0;
+  // Test for one epoch
+  for (let i = 0; i < testing.length; i++) {
+    let data = testing[i];
+    let inputs = data.map((x) => x / 255);
+    let label = testing[i].label;
+    let guess = nn.predict(inputs);
+    let m = max(guess);
+    let classification = guess.indexOf(m);
+    // console.log(guess);
+    // console.log(classification);
+    // console.log(label);
+
+    if (classification === label) {
+      correct++;
+    }
+  }
+  return correct / testing.length;
 }
 
 function prepareData(category, data, label) {
